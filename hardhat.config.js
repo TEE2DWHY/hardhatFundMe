@@ -1,15 +1,17 @@
-require("dotenv");
 require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
 require("hardhat-gas-reporter");
+require("dotenv").config();
 /** @type import('hardhat/config').HardhatUserConfig */
 
-const GOERLI_URL = process.env.GOERLI_URL || "georli";
-const PRIVATE_KEY = process.env.PRIVATE_KEY || "private_key";
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "apiKey";
+const GOERLI_URL = process.env.GOERLI_URL;
+const PRIVATE_KEY = process.env.PRIVATE_KEY;
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_APIKEY;
 
 module.exports = {
-  solidity: "0.8.18",
+  solidity: {
+    compilers: [{ version: "0.8.18" }, { version: "0.8" }],
+  },
   defaultNetwork: "hardhat",
   networks: {
     localhost: {

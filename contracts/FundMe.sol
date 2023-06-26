@@ -1,10 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.18;
 
+import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "./PriceConverter.sol";
 
 contract FundMe {
+    // Type Declarations
     using PriceConverter for uint256;
+
     uint256 public constant MAX_USD = 1000 * 1e18; // we use the Wei format because our getConversionRate function returns amount in USD in Wei format. The constant keyword helps with gas efficiency
     address[] public funders; // created an array of people who calls the fund function
     mapping(address => uint256) public addressToAmountFunded; // mapped each address to the amount they've funded
@@ -13,8 +16,8 @@ contract FundMe {
     AggregatorV3Interface priceFeed;
 
     constructor(address priceFeedAddress) {
-        i_owner = msg.sender;
         priceFeed = AggregatorV3Interface(priceFeedAddress);
+        i_owner = msg.sender;
     }
 
     // funding
@@ -24,7 +27,7 @@ contract FundMe {
             "ETH funding amount exceeded"
         );
         funders.push(msg.sender); // push addresses to the funders array
-        addressToAmountFunded[msg.sender] = msg.value; // map address to amount sent
+        addressToAmountFunded[msg.sender] += msg.value; // map address to amount sent
     }
 
     //withdraw
@@ -53,7 +56,7 @@ contract FundMe {
 
     // to ensure only the contract creator can call the withdraw function we do:
     modifier onlyOwner() {
-        msg.sender == i_owner;
+        require(msg.sender == i_owner, "Not owner");
         _;
     }
 
