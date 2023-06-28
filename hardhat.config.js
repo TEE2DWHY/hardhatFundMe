@@ -6,7 +6,8 @@ require("dotenv").config();
 
 const GOERLI_URL = process.env.GOERLI_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_APIKEY;
+const ETHERSCAN_APIKEY = process.env.ETHERSCAN_APIKEY;
+const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY;
 
 module.exports = {
   solidity: {
@@ -20,8 +21,9 @@ module.exports = {
     },
     goerli: {
       url: GOERLI_URL,
-      account: [PRIVATE_KEY],
+      accounts: [PRIVATE_KEY],
       chainId: 5,
+      blockConfirmations: 6,
     },
   },
   namedAccounts: {
@@ -34,9 +36,11 @@ module.exports = {
     },
   },
   etherscan: {
-    apiKey: ETHERSCAN_API_KEY,
+    apiKey: ETHERSCAN_APIKEY,
   },
   gasReporter: {
     enabled: true,
+    currency: "USD",
+    coinmarketcap: COINMARKETCAP_API_KEY,
   },
 };

@@ -1,0 +1,41 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ninterface AggregatorV3Interface {\n  function decimals() external view returns (uint8);\n\n  function description() external view returns (string memory);\n\n  function version() external view returns (uint256);\n\n  function getRoundData(uint80 _roundId)\n    external\n    view\n    returns (\n      uint80 roundId,\n      int256 answer,\n      uint256 startedAt,\n      uint256 updatedAt,\n      uint80 answeredInRound\n    );\n\n  function latestRoundData()\n    external\n    view\n    returns (\n      uint80 roundId,\n      int256 answer,\n      uint256 startedAt,\n      uint256 updatedAt,\n      uint80 answeredInRound\n    );\n}\n"
+    },
+    "contracts/FundMe.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity 0.8.18;\n\nimport \"@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\";\nimport \"./PriceConverter.sol\";\n\ncontract FundMe {\n    // Type Declarations\n    using PriceConverter for uint256;\n\n    uint256 public constant MAX_USD = 1000 * 1e18; // we use the Wei format because our getConversionRate function returns amount in USD in Wei format. The constant keyword helps with gas efficiency\n    address[] public funders; // created an array of people who calls the fund function\n    mapping(address => uint256) public addressToAmountFunded; // mapped each address to the amount they've funded\n    address public immutable i_owner; // owner of contract. The immutable keyword helps with gas efficiency\n    error NotOwner(); // a custom error handler. It helps with gas efficiency.\n    AggregatorV3Interface priceFeed;\n\n    constructor(address priceFeedAddress) {\n        priceFeed = AggregatorV3Interface(priceFeedAddress);\n        i_owner = msg.sender;\n    }\n\n    // funding\n    function fund() public payable {\n        require(\n            (msg.value.getConversionRate(priceFeed)) <= MAX_USD,\n            \"ETH funding amount exceeded\"\n        );\n        funders.push(msg.sender); // push addresses to the funders array\n        addressToAmountFunded[msg.sender] += msg.value; // map address to amount sent\n    }\n\n    //withdraw\n    function withdraw() public onlyOwner {\n        for (\n            uint256 funderIndex = 0;\n            funderIndex < funders.length;\n            funderIndex++\n        ) {\n            address funder = funders[funderIndex]; // we get the funder address from the first index\n            addressToAmountFunded[funder] = 0; // we reset the amount funded by funder to 0\n        }\n        funders = new address[](0); // we refresh the funders array after withdrawal\n        // payable(msg.sender).transfer(address(this).balance);=> // this is withdrawal method using the transfer method\n        // bool sendSuccess = payable(msg.sender).send(address(this).balance); => // this is withdrawal method using send method\n        // require(sendSuccess, \"Send Failure\");\n        (bool callSuccess, ) = payable(msg.sender).call{\n            value: address(this).balance\n        }(\"\"); // this is withdrawal method using the call method\n        // require(callSuccess, \"Call Failure\");\n        if (!callSuccess && msg.sender != i_owner) {\n            // rather than using the require keyword, we can use an error handler as it helps with gas efficiency.\n            revert();\n        }\n    }\n\n    // to ensure only the contract creator can call the withdraw function we do:\n    modifier onlyOwner() {\n        require(msg.sender == i_owner, \"Not owner\");\n        _;\n    }\n\n    receive() external payable {\n        // this would help handle a scenraio where an address sends money to our contract without calling the fund function\n        fund();\n    }\n\n    fallback() external payable {\n        // this would help handle a scenraio where an address sends money to our contract without calling the fund function\n        fund();\n    }\n}\n"
+    },
+    "contracts/PriceConverter.sol": {
+      "content": "// SPDX-License-Identifier: MIT\n\npragma solidity 0.8.18;\n\nimport \"@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol\"; // imported the Chain link aggreagtor\n\nlibrary PriceConverter {\n    // We firstly want to get the current price of ETH\n    function getPrice(\n        AggregatorV3Interface priceFeed // with this we dont have to hardcode the price feed address like we did before\n    ) internal view returns (uint256) {\n        (, int256 price, , , ) = priceFeed.latestRoundData();\n        return uint256(price * 1e10);\n    }\n\n    // We want to get the price in USD for an amount of ETH\n    function getConversionRate(\n        uint256 ethAmount,\n        AggregatorV3Interface priceFeed\n    ) internal view returns (uint256) {\n        uint256 ethPrice = getPrice(priceFeed);\n        uint256 amountInUsd = (ethPrice * ethAmount) / 1e18;\n        return amountInUsd;\n    }\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
