@@ -3,6 +3,7 @@ pragma solidity 0.8.18;
 
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 import "./PriceConverter.sol";
+import "hardhat/console.sol";
 
 /// @title A contract for Crowd Funding
 /// @author Olorunfemi Tayo
@@ -14,11 +15,11 @@ contract FundMe {
     using PriceConverter for uint256;
     // state variables
     uint256 public constant MAX_USD = 1000 * 1e18; // we use the Wei format because our getConversionRate function returns amount in USD in Wei format. The constant keyword helps with gas efficiency
-    address[] private funders; // created an array of people who calls the fund function
-    mapping(address => uint256) public addressToAmountFunded; // mapped each address to the amount they've funded
+    address[] private s_funders; // created an array of people who calls the fund function
+    mapping(address => uint256) private s_addressToAmountFunded; // mapped each address to the amount they've funded
     address private immutable i_owner; // owner of contract. The immutable keyword helps with gas efficiency
     error NotOwner(); // a custom error handler. It helps with gas efficiency.
-    AggregatorV3Interface priceFeed;
+    AggregatorV3Interface private s_priceFeed;
 
     // to ensure only the contract creator can call the withdraw function we do:
     modifier onlyOwner() {
@@ -27,36 +28,35 @@ contract FundMe {
     }
 
     constructor(address priceFeedAddress) {
-        priceFeed = AggregatorV3Interface(priceFeedAddress);
+        s_priceFeed = AggregatorV3Interface(priceFeedAddress);
         i_owner = msg.sender;
     }
-
-    // funding
 
     /// @notice This function funds the contract
     /// @dev This implements price feed as our library
     function fund() public payable {
         require(
-            (msg.value.getConversionRate(priceFeed)) <= MAX_USD,
+            (msg.value.getConversionRate(s_priceFeed)) <= MAX_USD,
             "ETH funding amount exceeded"
         );
-        funders.push(msg.sender); // push addresses to the funders array
-        addressToAmountFunded[msg.sender] += msg.value; // map address to amount sent
+        s_funders.push(msg.sender); // push addresses to the funders array
+        s_addressToAmountFunded[msg.sender] += msg.value; // map address to amount sent
     }
 
     //withdraw
     function withdraw() public onlyOwner {
-        require(funders.length > 0, "No funders to withdraw from");
+        console.log("This is a withdrawal function");
+        require(s_funders.length > 0, "No funders to withdraw from");
 
         for (
             uint256 funderIndex = 0;
-            funderIndex < funders.length;
+            funderIndex < s_funders.length;
             funderIndex++
         ) {
-            address funder = funders[funderIndex];
-            addressToAmountFunded[funder] = 0;
+            address funder = s_funders[funderIndex];
+            s_addressToAmountFunded[funder] = 0;
         }
-        funders = new address[](0); // we refresh the funders array after withdrawal
+        s_funders = new address[](0); // we refresh the funders array after withdrawal
         // payable(msg.sender).transfer(address(this).balance);=> // this is withdrawal method using the transfer method
         // bool sendSuccess = payable(msg.sender).send(address(this).balance); => // this is withdrawal method using send method
         // require(sendSuccess, "Send Failure");

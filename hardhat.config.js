@@ -2,6 +2,8 @@ require("@nomicfoundation/hardhat-toolbox");
 require("hardhat-deploy");
 require("hardhat-gas-reporter");
 require("dotenv").config();
+require("solidity-coverage");
+// require("solidity-coverage");
 /** @type import('hardhat/config').HardhatUserConfig */
 
 const GOERLI_URL = process.env.GOERLI_URL;
@@ -41,6 +43,6 @@ module.exports = {
   gasReporter: {
     enabled: true,
     currency: "USD",
-    coinmarketcap: COINMARKETCAP_API_KEY,
+    // coinmarketcap: COINMARKETCAP_API_KEY,
   },
 };

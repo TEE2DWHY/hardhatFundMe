@@ -24,7 +24,6 @@ const deployFunc = async ({ getNamedAccounts, deployments }) => {
     args: [ethUsdPriceFeedAddress],
     log: true,
     waitConfirmations: network.config.blockConfirmations || 1,
-    gasLimit: 2000000,
     // we need to wait if on a live network so we can verify properly
   });
   log(`FundMe deployed at ${fundMe.address}`);
