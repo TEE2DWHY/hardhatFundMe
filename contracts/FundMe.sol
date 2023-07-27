@@ -14,9 +14,9 @@ contract FundMe {
     // Type Declarations
     using PriceConverter for uint256;
     // state variables
-    uint256 public constant MIN_USD = 50 * 1e18; // we use the Wei format because our getConversionRate function returns amount in USD in Wei format. The constant keyword helps with gas efficiency
+    uint256 public constant MAX_USD = 1000 * 1e18; // we use the Wei format because our getConversionRate function returns amount in USD in Wei format. The constant keyword helps with gas efficiency
     address[] private s_funders; // created an array of people who calls the fund function
-    mapping(address => uint256) private s_addressToAmountFunded; // mapped each address to the amount they've funded
+    mapping(address => uint256) private s_addressToAmountFunded; 
     address private immutable i_owner; // owner of contract. The immutable keyword helps with gas efficiency
     error NotOwner(); // a custom error handler. It helps with gas efficiency.
     AggregatorV3Interface private s_priceFeed;
@@ -36,7 +36,7 @@ contract FundMe {
     /// @dev This implements price feed as our library
     function fund() public payable {
         require(
-            (msg.value.getConversionRate(s_priceFeed)) >= MIN_USD,
+            (msg.value.getConversionRate(s_priceFeed)) <= MAX_USD,
             "ETH funding amount exceeded"
         );
         s_funders.push(msg.sender); // push addresses to the funders array

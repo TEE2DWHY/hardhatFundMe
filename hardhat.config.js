@@ -8,8 +8,8 @@ require("solidity-coverage");
 
 const GOERLI_URL = process.env.GOERLI_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
-const ETHERSCAN_APIKEY = process.env.ETHERSCAN_APIKEY || "I trust you, yahweh";
-const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY || "Pray oh";
+const ETHERSCAN_APIKEY = process.env.ETHERSCAN_APIKEY;
+const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY;
 
 module.exports = {
   solidity: {
@@ -43,6 +43,6 @@ module.exports = {
   gasReporter: {
     enabled: true,
     currency: "USD",
-    coinmarketcap: COINMARKETCAP_API_KEY,
+    // coinmarketcap: COINMARKETCAP_API_KEY,
   },
 };
