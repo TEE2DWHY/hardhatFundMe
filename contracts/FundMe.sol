@@ -21,15 +21,15 @@ contract FundMe {
     error NotOwner(); // a custom error handler. It helps with gas efficiency.
     AggregatorV3Interface private s_priceFeed;
 
-    // to ensure only the contract creator can call the withdraw function we do:
-    modifier onlyOwner() {
-        require(msg.sender == i_owner, "Not owner");
-        _;
-    }
-
     constructor(address priceFeedAddress) {
         s_priceFeed = AggregatorV3Interface(priceFeedAddress);
         i_owner = msg.sender;
+    }
+
+     // to ensure only the contract creator can call the withdraw function we do:
+    modifier onlyOwner() {
+        require(msg.sender == i_owner, "Not owner");
+        _;
     }
 
     /// @notice This function funds the contract
@@ -37,7 +37,7 @@ contract FundMe {
     function fund() public payable {
         require(
             (msg.value.getConversionRate(s_priceFeed)) >= MIN_USD,
-            "ETH funding amount exceeded"
+            "ETH funding amount is too little"
         );
         s_funders.push(msg.sender); // push addresses to the funders array
         s_addressToAmountFunded[msg.sender] += msg.value; // map address to amount sent
