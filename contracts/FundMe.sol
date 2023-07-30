@@ -80,3 +80,6 @@ contract FundMe {
         fund();
     }
 }
+
+
+// contract address(goerli network):  0xA52F681B495A65d2B139A6dd9fd332C0577Bf776

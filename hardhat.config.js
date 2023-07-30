@@ -7,6 +7,7 @@ require("solidity-coverage");
 /** @type import('hardhat/config').HardhatUserConfig */
 
 const GOERLI_URL = process.env.GOERLI_URL;
+const ETH_MAINNET = process.env.ETH_MAINNET_URL;
 const PRIVATE_KEY = process.env.PRIVATE_KEY;
 const ETHERSCAN_APIKEY = process.env.ETHERSCAN_APIKEY;
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY;
@@ -26,6 +27,12 @@ module.exports = {
       accounts: [PRIVATE_KEY],
       chainId: 5,
       blockConfirmations: 6,
+    },
+    eth: {
+      url: ETH_MAINNET,
+      accounts: [PRIVATE_KEY],
+      chainId: 1,
+      blockConfirmations: 2,
     },
   },
   namedAccounts: {
